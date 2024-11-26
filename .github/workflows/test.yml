@@ -55,15 +55,13 @@ jobs:
         with:
           python-version: ${{ matrix.python_version }}
 
-      - name: Install Git
-        run: |
-          apt update && apt install -y git
-
       - name: ⏬️ Install Dependencies
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
-          apt update && apt install -y libegl1 sqlite3 libsqlite3-dev libsqlite3-0 ffmpeg libsm6 libxext6
+          apt update && apt install -y git libegl1 sqlite3 libsqlite3-dev libsqlite3-0 ffmpeg libsm6 libxext6
+          # required by llama-cpp-python prebuilt wheels
+          apt install -y musl-dev && ln -s /usr/lib/x86_64-linux-musl/libc.so /lib/libc.musl-x86_64.so.1
 
       - name: ⬇️ Install Postgres
         env:
@@ -72,6 +70,8 @@ jobs:
           apt install -y postgresql postgresql-client && apt install -y postgresql-server-dev-14
 
       - name: ⬇️ Install pip
+        env:
+          PIP_EXTRA_INDEX_URL: "https://download.pytorch.org/whl/cpu https://abetlen.github.io/llama-cpp-python/whl/cpu"
         run: |
           apt install -y python3-pip
           python -m ensurepip --upgrade
